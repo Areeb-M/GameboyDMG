@@ -1,4 +1,5 @@
 ﻿using System;
+using Emulator;
 
 namespace GameboyDMG
 {
@@ -11,9 +12,12 @@ namespace GameboyDMG
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
-            using (var game = new GameboyDMG())
+            Manager manager = new Manager();
+            manager.InitializeGameboy(args[0], args[1]);
+
+            using (var game = new GameboyDMG(manager))
                 game.Run();
         }
     }

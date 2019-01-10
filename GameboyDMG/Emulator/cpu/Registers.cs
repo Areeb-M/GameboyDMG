@@ -2,7 +2,7 @@ using System;
 
 namespace Emulator
 {
-	class Registers
+	public class Registers
 	{	
 	
 		public override string ToString()

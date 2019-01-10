@@ -37,7 +37,7 @@ namespace Emulator
 
             interruptController = new InterruptController();
             timer = new Timer(interruptController);
-            ppu = new PPU(interruptController, lcd);
+            ppu = new PPU(interruptController);
             registers = new Registers(timer.TimerRegisters, ppu.DisplayRegisters);
 
             stopwatch = new Stopwatch();
@@ -46,6 +46,11 @@ namespace Emulator
         public void Tick()
         {
             clock.Tick();
+        }
+
+        public PPU GetPPU()
+        {
+            return ppu;
         }
 
     }

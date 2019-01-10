@@ -2,7 +2,7 @@ using System;
 
 namespace Emulator
 {
-	class DataBus<T>
+	public class DataBus<T>
 	{
 		T data;
 		

@@ -2,7 +2,7 @@ using System;
 
 namespace Emulator
 {
-	class Clock
+	public class Clock
 	{
 		Timer timer;
 		CPU cpu;

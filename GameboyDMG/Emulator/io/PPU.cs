@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace Emulator
 {
-	class PPU
+	public class PPU
 	{
 		byte[] vram;
 		byte[] oam;
@@ -230,8 +229,6 @@ namespace Emulator
 					//image.SetPixel(2*(x-startX)+1, 2*(y-startY)+1, c);
 				}
 			}
-			
-			lcd.Refresh(finished.Bitmap);
 		}
 		
 		public void PrintTile(int i)
@@ -311,6 +308,13 @@ namespace Emulator
 		{
 			System.IO.File.WriteAllBytes("vram.dmp", vram);
 		}
+
+        public Bitmap GetScreen()
+        {
+            // Meant to be called from the outside, blocks call until VBlank
+            // while (ppuState != 3) { }
+            return finished.Bitmap;
+        }
 		
 		#region Data Access
 		public byte ReadVRAM(int index)

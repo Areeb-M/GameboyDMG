@@ -7,5 +7,13 @@ using System.Threading.Tasks;
 namespace Emulator
 {
     class GameboyUninitializedException: ApplicationException
-    {    }
+    { }
+
+    class UnknownOpcodeException : ApplicationException
+    {
+        public UnknownOpcodeException(string errorMessage) : base(errorMessage)
+        {
+
+        }
+    }
 }

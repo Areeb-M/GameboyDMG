@@ -2,7 +2,7 @@ using System;
 
 namespace Emulator
 {
-	class Timer
+	public class Timer
 	{
 		#region Timer Registers
 		DataBus<byte> dividerRegister;

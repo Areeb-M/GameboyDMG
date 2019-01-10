@@ -2,7 +2,7 @@ using System;
 
 namespace Emulator
 {
-	class Cartridge
+	public class Cartridge
 	{
 		// Universal Cartridge Data
 		protected int romBanks;

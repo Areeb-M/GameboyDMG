@@ -1,43 +1,42 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using GameboyDMG.Emulator;
+using Emulator;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace GameboyDMG
 {
-    /// <summary>
-    /// This is the main type for your game.
-    /// </summary>
     public class GameboyDMG : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Manager manager;
+
+        int scale;
+        Rectangle GameBoyScreen;
         
         
-        public GameboyDMG()
+        public GameboyDMG(Manager manager)
         {
+            this.manager = manager;
             graphics = new GraphicsDeviceManager(this);
+
+            scale = 3;
+            GameBoyScreen = new Rectangle(0, 0, 160 * scale, 144 * scale);
+            graphics.PreferredBackBufferHeight = GameBoyScreen.Height;
+            graphics.PreferredBackBufferWidth = GameBoyScreen.Width;
+
             Content.RootDirectory = "Content";
         }
-
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
+        
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            manager = new Manager();
             base.Initialize();
+            manager.Start();
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
@@ -46,20 +45,12 @@ namespace GameboyDMG
             // TODO: use this.Content to load your game content here
         }
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
-        /// </summary>
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
+            manager.Stop();
         }
 
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -69,18 +60,43 @@ namespace GameboyDMG
 
             base.Update(gameTime);
         }
-
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            System.Drawing.Bitmap render = manager.ReadScreen();
+            Texture2D result = GetTexture2DFromBitmap(graphics.GraphicsDevice, render);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin();
+
+            spriteBatch.Draw(result, GameBoyScreen, Color.White);
+
+            spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        public static Texture2D GetTexture2DFromBitmap(GraphicsDevice device, System.Drawing.Bitmap bitmap)
+        {
+            Texture2D tex = new Texture2D(device, bitmap.Width, bitmap.Height);
+
+            BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, bitmap.PixelFormat);
+
+            int bufferSize = data.Height * data.Stride;
+
+            //create data buffer 
+            byte[] bytes = new byte[bufferSize];
+
+            // copy bitmap data into buffer
+            Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
+
+            // copy our buffer to the texture
+            tex.SetData(bytes);
+
+            // unlock the bitmap data
+            bitmap.UnlockBits(data);
+
+            return tex;
         }
     }
 }

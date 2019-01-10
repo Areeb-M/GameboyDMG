@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Emulator
 {
-    static class Debug
+    public static class Debug
     {
-        private const int DEBUG_LEVEL = 0;
+        private const int DEBUG_LEVEL = 50;
 
         private static void Write(string message, params object[] args)
         {
@@ -33,7 +33,7 @@ namespace Emulator
         {
             Log(0, "[{0:X4}]{1:X2}: ", PC, opcode);
         }
-
+        /*
         public static void ShowConsole()
         {
             if (!AttachConsole(-1))
@@ -45,6 +45,6 @@ namespace Emulator
         static extern bool AllocConsole();
 
         [DllImport("kernel32", SetLastError = true)]
-        private static extern bool AttachConsole(int dwProcessId);
+        private static extern bool AttachConsole(int dwProcessId);*/
     }
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace Emulator
 {
-	static class MemoryLoader
+	public static class MemoryLoader
 	{
 		
 		public static Memory ReloadSaveState(Memory memory, Registers reg, string pathToSave)

@@ -4,19 +4,13 @@ using System.Collections.Generic;
 
 namespace Emulator
 {
-	class CPU
+	public class CPU
 	{
 		Memory memory;
 		Registers reg;
 		InterruptController ic;
 		
 		private IEnumerator opcode;
-		private bool alive;
-		
-		public bool Alive
-		{
-			get { return alive; }
-		}
 
 		public Registers registers
 		{
@@ -29,8 +23,7 @@ namespace Emulator
 			ic = interruptController;
 			reg	= registers;
 			
-			opcode = DefaultFunc().GetEnumerator();		
-			alive = true;
+			opcode = DefaultFunc().GetEnumerator();	
 		}
 		
 		private IEnumerable<bool> DefaultFunc()
@@ -47,13 +40,12 @@ namespace Emulator
 				{
 					opcode = OpcodeTable.Call(memory[reg.PC], memory, reg);
 					// Fetch takes 1 cycle
-					Debug.Log("\n{0:X2} - ", reg);
+					Debug.Log(0, "\n{0:X2} - ", reg);
 				}
 				else
 				{
-					Console.Write("\nUnknown Opcode: {0:X2} at {1:X4}", memory[reg.PC], reg.PC);
-					Console.Write(" - {0}", reg);
-					alive = false;
+                    string errorMessage = String.Format("\nUnknown Opcode: {0:X2} at {1:X4} - {2}", memory[reg.PC], reg.PC, reg);
+                    throw new UnknownOpcodeException(errorMessage);
 				}
 				
 			}

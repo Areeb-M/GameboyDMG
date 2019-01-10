@@ -2,7 +2,7 @@ using System;
 
 namespace Emulator
 {
-	class InterruptController
+	public class InterruptController
 	{
 		DataBus<byte> interruptEnableFlag;
 		bool interruptsEnabled;
