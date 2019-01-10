@@ -26,7 +26,7 @@ namespace Emulator
              *  100 - General Info
             */
             if (level > DEBUG_LEVEL)
-                Write(message, args);
+                Console.Write(message, args);
         }
 
         public static void LogOpcode(int PC, byte opcode)

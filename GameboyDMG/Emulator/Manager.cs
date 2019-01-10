@@ -22,7 +22,7 @@ namespace Emulator
             ThreadStart executionPoint = new ThreadStart(Run);
             emulationThread = new Thread(executionPoint);
 
-            Debug.Log(100, "Initialized Manager!");
+            Debug.Log(100, "Initialized Manager!\n");
         }
         
         public void InitializeGameboy(string romPath, string bootRomPath = "")
@@ -32,7 +32,7 @@ namespace Emulator
             else
                 gameboy = new GameBoy(romPath);
 
-            Debug.Log(100, "Initialized GameBoy!");
+            Debug.Log(100, "Initialized GameBoy!\n");
             initialized = true;
             alive = true;
         }
@@ -43,7 +43,7 @@ namespace Emulator
                 throw new GameboyUninitializedException();
 
             emulationThread.Start();
-
+            Debug.Log(100, "Beginning emulation.\n\n\n");
         }
 
         private void Run()
