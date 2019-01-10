@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using GameboyDMG.Emulator;
 
 namespace GameboyDMG
 {
@@ -11,6 +12,8 @@ namespace GameboyDMG
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Manager manager;
+        
         
         public GameboyDMG()
         {
@@ -27,7 +30,7 @@ namespace GameboyDMG
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            manager = new Manager();
             base.Initialize();
         }
 
