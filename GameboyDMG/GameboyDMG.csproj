@@ -79,6 +79,7 @@
     <Compile Include="Emulator\memory\Memory.cs" />
     <Compile Include="Emulator\memory\MemoryLoader.cs" />
     <Compile Include="GameboyDMG.cs" />
+    <Compile Include="Graphics\GraphicsCore.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -2,8 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Emulator;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
+using GameboyDMG.Graphics;
+using System;
 
 namespace GameboyDMG
 {
@@ -15,6 +15,7 @@ namespace GameboyDMG
 
         int scale;
         Rectangle GameBoyScreen;
+        SpriteFont defaultFont;
         
         
         public GameboyDMG(Manager manager)
@@ -22,8 +23,9 @@ namespace GameboyDMG
             this.manager = manager;
             graphics = new GraphicsDeviceManager(this);
 
-            scale = 3;
+            scale = 4;
             GameBoyScreen = new Rectangle(0, 0, 160 * scale, 144 * scale);
+
             graphics.PreferredBackBufferHeight = GameBoyScreen.Height;
             graphics.PreferredBackBufferWidth = GameBoyScreen.Width;
 
@@ -34,6 +36,10 @@ namespace GameboyDMG
         {
             // TODO: Add your initialization logic here
             base.Initialize();
+            GraphicsCore.CreateScreenModel(graphics);
+            //this.IsFixedTimeStep = false;
+            this.TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 144.0f);
+            graphics.SynchronizeWithVerticalRetrace = true;
             manager.Start();
         }
 
@@ -41,7 +47,7 @@ namespace GameboyDMG
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            defaultFont = Content.Load<SpriteFont>("fonts/DefaultFont");
             // TODO: use this.Content to load your game content here
         }
 
@@ -63,40 +69,21 @@ namespace GameboyDMG
         
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
             System.Drawing.Bitmap render = manager.ReadScreen();
-            Texture2D result = GetTexture2DFromBitmap(graphics.GraphicsDevice, render);
+            Texture2D result = GraphicsCore.GetTexture2DFromBitmap(graphics.GraphicsDevice, render);
 
             spriteBatch.Begin();
+        
+            GraphicsCore.Draw3DScreen(spriteBatch, graphics, result);
 
-            spriteBatch.Draw(result, GameBoyScreen, Color.White);
+            double framerate = (1 / gameTime.ElapsedGameTime.TotalSeconds);
+            string fpsCounter = string.Format("FPS: {0:N0}", framerate);
+            spriteBatch.DrawString(defaultFont, fpsCounter, new Vector2(0, 0), Color.Red);
 
             spriteBatch.End();
 
             base.Draw(gameTime);
-        }
-
-        public static Texture2D GetTexture2DFromBitmap(GraphicsDevice device, System.Drawing.Bitmap bitmap)
-        {
-            Texture2D tex = new Texture2D(device, bitmap.Width, bitmap.Height);
-
-            BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, bitmap.PixelFormat);
-
-            int bufferSize = data.Height * data.Stride;
-
-            //create data buffer 
-            byte[] bytes = new byte[bufferSize];
-
-            // copy bitmap data into buffer
-            Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
-
-            // copy our buffer to the texture
-            tex.SetData(bytes);
-
-            // unlock the bitmap data
-            bitmap.UnlockBits(data);
-
-            return tex;
         }
     }
 }

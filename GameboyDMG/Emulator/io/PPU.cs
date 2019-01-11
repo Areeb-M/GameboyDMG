@@ -115,7 +115,7 @@ namespace Emulator
 				scanLine.Data = (byte)((scanLine.Data + 1) % 154);		
 				if (scanLine.Data == 144)
 				{
-					RefreshLCD();
+					//RefreshLCD();
 					ppuState = 3;
 				} else 
 				{
@@ -129,6 +129,7 @@ namespace Emulator
 			else if (ppuClock == 62)
 			{
 				ppuState = 2; // HBlank
+                RenderLine();
 			}
 		}
 		
@@ -230,6 +231,44 @@ namespace Emulator
 				}
 			}
 		}
+
+        private Color[] bgColors = new Color[] 
+        {
+            Color.White,
+            Color.Black,
+            Color.Gray,
+            Color.DarkGray
+        };
+
+        private void RenderLine()
+        {
+            RenderBackgroundLine();
+        }
+
+        private void RenderBackgroundLine()
+        {
+            int screenY = scanLine.Data;
+            int realX, realY, bgX, bgY, bgModX, bgModY, tileAddress, low, high;
+            realY = (screenY + scrollY.Data) % 256;
+            bgY = realY / 8;
+            bgModY = realY % 8;
+
+            for(int screenX = 0; screenX < 160; screenX++)
+            {
+                realX = (screenX + scrollX.Data) % 256;
+                bgX = realX / 8;
+                // Since data is stored "backwards" in ram (pixel 7 being first), subtracting the modulos from 7 reverses it
+                bgModX = 7 - (realX % 8);
+                tileAddress = 16 * vram[0x1800 + bgX + 32 * bgY] + 2 * bgModY;
+
+                low = vram[tileAddress] >> bgModX;
+                low &= 0x1;
+                high = vram[tileAddress + 1] >> bgModX;
+                high &= 0x1;
+
+                finished.SetPixel(screenX, screenY, bgColors[low | (high << 1)]);
+            }
+        }
 		
 		public void PrintTile(int i)
 		{

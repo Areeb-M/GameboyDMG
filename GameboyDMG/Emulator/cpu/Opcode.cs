@@ -160,6 +160,10 @@ namespace Emulator
 					Debug.Log(0, "LD C, d8");
 					reg.C = n;
 					break;
+                case 0x16:
+                    Debug.Log(0, "LD D, d8");
+                    reg.D = n;
+                    break;
 				case 0x1E:
 					Debug.Log(0, "LD E, d8");
 					reg.E = n;
