@@ -34,6 +34,14 @@ namespace Emulator
 		
 		public void Tick()
 		{
+            if (reg.GetEnableInterruptsFlag() == 1)
+            {
+                ic.EnableInterrupts();
+            }
+            if (reg.GetDisableInterruptsFlag() == 1)
+            {
+                ic.DisableInterrupts();
+            }
 			if (!opcode.MoveNext())
 			{
 				if (OpcodeTable.ContainsKey(memory[reg.PC]))

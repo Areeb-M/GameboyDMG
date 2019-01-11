@@ -251,7 +251,7 @@ namespace Emulator
 		
 		protected virtual void WriteIORegister(int index, byte val)
 		{
-			switch(index)
+			switch(index & 0xFF)
 			{
 				case 0x00:
 					reg.P1 = val;
@@ -380,7 +380,7 @@ namespace Emulator
 					reg.IE = val;
 					break;
 				default:
-					io[index] = val;
+					io[index - 0xFF00] = val;
 					break;
 			}
 			
@@ -456,6 +456,11 @@ namespace Emulator
 							else
 								WriteEmptyButUnusable(index, val);
 							break;
+                        case 5:
+                        case 6:
+                        case 7:
+                            WriteEmptyButUnusable(index, val);
+                            break;
 						default:
 							if (index < 0xFFFF)
 								WriteHRAM(index, val);

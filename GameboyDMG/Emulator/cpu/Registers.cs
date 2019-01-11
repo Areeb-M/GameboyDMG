@@ -23,9 +23,42 @@ namespace Emulator
 	
 		private DataBus<byte>[] TIMER;
 		private DataBus<byte>[] DISPLAY;
-	
-		#region PC & SP
-		int programCounter = 0x100;
+
+        #region Interrupt Flags
+        private byte enableInterruptsFlag = 0;
+        private byte disableInterruptsFlag = 0;
+
+        // Every time an access function is called, it
+        // divides the respective variable by 2. (Subtracting doesn't work
+        // because it would go into the negatives)
+        // Whenever a flag reaches 1, it does its respective operation
+        // Therefore, having an EI followed by a DI or vice verse
+        // still functions properly
+        public void EnableInterrupts()
+        {
+            enableInterruptsFlag = 2;
+        }
+
+        public void DisableInterrupts()
+        {
+            disableInterruptsFlag = 2;
+        }
+
+        public byte GetEnableInterruptsFlag()
+        {
+            enableInterruptsFlag /= 2;
+            return enableInterruptsFlag;
+        }
+
+        public byte GetDisableInterruptsFlag()
+        {
+            disableInterruptsFlag /= 2;
+            return disableInterruptsFlag;
+        }
+        #endregion
+
+        #region PC & SP
+        int programCounter = 0x100;
 		int stackPointer = 0xFFFE;
 		
 		public int PC

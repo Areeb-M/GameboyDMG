@@ -37,6 +37,13 @@ namespace Emulator
 			
 			switch(mem[reg.PC])
 			{
+                case 0x01:
+                    reg.C = low;
+                    yield return true;
+                    reg.B = high;
+                    yield return true;
+                    Debug.Log(0, "LD BC, d16");
+                    break;
 				case 0x11:
 					reg.E = low;
 					yield return true;
@@ -68,9 +75,15 @@ namespace Emulator
 		{
 			int a = reg.A;
 			int b;
-			switch (mem[reg.PC]){
-				case 0xAE:
+			switch (mem[reg.PC])
+            {
+                case 0xA9:
+                    b = reg.C;
+                    Debug.Log(0, "XOR C");
+                    break;
+                case 0xAE:
 					b = mem[reg.HL];
+                    Debug.Log(0, "XOR (HL)");
 					break;
 				case 0xAF:
 					b = reg.A;
@@ -229,6 +242,10 @@ namespace Emulator
 		{
 			switch(mem[reg.PC])
 			{
+                case 0x47:
+                    reg.B = reg.A;
+                    Debug.Log(0, "LD B, A");
+                    break;
 				case 0x4F:
 					reg.C = reg.A;
 					Debug.Log(0, "LD C, A");
@@ -285,15 +302,30 @@ namespace Emulator
 					Debug.Log(0, "LD A, (DE)");
 					yield return true;
 					break;
-				case 0x7B:
+                case 0x36:
+                    reg.PC += 1;
+                    yield return true;
+                    mem[reg.HL] = mem[reg.PC];
+                    Debug.Log(0, "LD (LH), d8");
+                    yield return true;
+                    break;
+                case 0x78:
+                    reg.A = reg.B;
+                    Debug.Log(0, "LD A, B");
+                    break;
+                case 0x7B:
 					reg.A = reg.E;
 					Debug.Log(0, "LD A, E");
 					break;
-				case 0x7C:
-					reg.A = reg.H;
-					Debug.Log(0, "LD A, H");
-					break;
-			}
+                case 0x7C:
+                    reg.A = reg.H;
+                    Debug.Log(0, "LD A, H");
+                    break;
+                case 0x7D:
+                    reg.A = reg.L;
+                    Debug.Log(0, "LD A, L");
+                    break;
+            }
 			
 			reg.PC += 1;
 			
@@ -427,8 +459,19 @@ namespace Emulator
 		
 			yield break;
 		}
-		
-		public static IEnumerable<bool> INCREMENT_16_REG(Memory mem, Registers reg)
+
+        public static IEnumerable<bool> LDI_A_HL(Memory mem, Registers reg)
+        {
+            reg.A = mem[reg.HL++];
+            yield return true;
+
+            Debug.Log(0, "LDI A, (HL++)");
+            reg.PC += 1;
+
+            yield break;
+        }
+
+        public static IEnumerable<bool> INCREMENT_16_REG(Memory mem, Registers reg)
 		{			
 			switch(mem[reg.PC])
 			{
@@ -466,10 +509,16 @@ namespace Emulator
 			byte val = 0;
 			switch(mem[reg.PC])
 			{
+                case 0xBE:
+                    val = mem[reg.HL];
+                    Debug.Log(0, "CP (HL)");
+                    yield return true;
+                    break;
 				case 0xFE:
 					val = mem[reg.PC + 1];
 					Debug.Log(0, "CP d8");
-					yield return true;
+                    reg.PC += 1;
+                    yield return true;
 					break;
 			}
 			reg.fZ = reg.A == val;
@@ -477,7 +526,7 @@ namespace Emulator
 			reg.fH = !ZMath.CheckHalfBorrow(reg.A, val);
 			reg.fC = reg.A < val;
 			
-			reg.PC += 2;
+			reg.PC += 1;
 			
 			yield break;
 		}
@@ -530,14 +579,143 @@ namespace Emulator
 			yield break;
 		}
 		
+        public static IEnumerable<bool> ADD(Memory mem, Registers reg)
+        {
+            byte val = 0;
+            switch(mem[reg.PC])
+            {
+                case 0x86:
+                    val = mem[reg.HL];
+                    yield return true;
+                    Debug.Log(0, "ADD A, (HL)");
+                    break;
+            }
+            int result = reg.A + val;
+
+            reg.fZ = ((byte)result) == 0;
+            reg.fN = false;
+            reg.fH = ZMath.CheckHalfCarry(reg.A, val);
+            reg.fC = result > 0xFF;
+
+            reg.A = (byte)result;
+            reg.PC += 1;
+            yield break;
+        }
+
+        public static IEnumerable<bool> JUMP(Memory mem, Registers reg)
+        {
+            byte low = mem[reg.PC + 1];
+            yield return true;
+            byte high = mem[reg.PC + 2];
+            yield return true;
+
+            reg.PC = (high << 8) | low;
+            yield return true;
+            //Debug.Log(200, "JUMP {0:X4}", reg.PC);
+            Console.WriteLine("JUMP {0:X4}", reg.PC);
+            yield break;
+        }
+
+        public static IEnumerable<bool> DI(Memory mem, Registers reg)
+        {
+            reg.DisableInterrupts();
+
+            reg.PC += 1;
+            yield break;
+        }
+
+        public static IEnumerable<bool> EI(Memory mem, Registers reg)
+        {
+            reg.EnableInterrupts();
+
+            reg.PC += 1;
+            yield break;
+        }
+
+        public static IEnumerable<bool> DECREMENT_NN(Memory mem, Registers reg)
+        {
+            switch(mem[reg.PC])
+            {
+                case 0x0B:
+                    reg.BC -= 1;
+                    yield return true;
+                    Debug.Log(0, "DEC BC");
+                    break;
+            }
+            reg.PC += 1;
+            yield break;
+        }
+
+        public static IEnumerable<bool> OR(Memory mem, Registers reg)
+        {
+            switch (mem[reg.PC])
+            {
+                case 0xB0:
+                    reg.A |= reg.B;
+                    Debug.Log(0, "OR B");
+                    break;
+                case 0xB1:
+                    reg.A |= reg.C;
+                    Debug.Log(0, "OR C");
+                    break;
+            }
+            reg.fZ = reg.A == 0;
+            reg.fN = false;
+            reg.fH = false;
+            reg.fC = false;
+
+            reg.PC += 1;
+            yield break;
+        }
+
+        public static IEnumerable<bool> COMPLEMENT(Memory mem, Registers reg)
+        {
+            reg.A = (byte)~reg.A;
+            reg.PC += 1;
+
+            reg.fN = true;
+            reg.fH = true;
+
+            Debug.Log(0, "CPL A");
+            yield break;
+        }
+
+        public static IEnumerable<bool> AND(Memory mem, Registers reg)
+        {
+            switch(mem[reg.PC])
+            {
+                case 0xA1:
+                    reg.A &= reg.C;
+                    Debug.Log(0, "AND C");
+                    break;
+                case 0xE6:
+                    reg.PC += 1;
+                    yield return true;
+                    reg.A &= mem[reg.PC];
+                    Debug.Log(0, "AND d8");
+                    break;
+            }
+            reg.fZ = reg.A == 0;
+            reg.fN = false;
+            reg.fH = true;
+            reg.fC = false;
+
+            reg.PC += 1;
+            yield break;
+        }
+
 		/*
 		public static IEnumerable<bool> LOAD_R2_R1(Memory mem, Registers reg)
 		{
 			Implement Later
 		}*/
 	}
-	
-	static class PrefixCB
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------
+    //  CB Prefix Commands
+    // -----------------------------------------------------------------------------------------------------------------------------------------------
+
+    static class PrefixCB
 	{
 		public static IEnumerable<bool> HandleCB(Memory mem, Registers reg)
 		{
@@ -546,10 +724,12 @@ namespace Emulator
 			{
 				case 0x11:
 					return RL(mem, reg);
+                case 0x37:
+                    return SWAP(mem, reg);
 				case 0x7C:
 					return BIT(mem, reg);
 				default:
-					throw new InvalidOperationException("CB prefix instruction has not been implemented yet!");
+					throw new InvalidOperationException(String.Format("CB-{0:X2} has not been implemented yet!", mem[reg.PC+1]));
 			}
 		}
 		
@@ -571,7 +751,7 @@ namespace Emulator
 			yield break;
 		}
 		
-		private static IEnumerable<bool> RL (Memory mem, Registers reg) // Rotate Left, store bit 7 in fC
+		private static IEnumerable<bool> RL(Memory mem, Registers reg) // Rotate Left, store bit 7 in fC
 		{
 			Debug.Log(0, "RL ");
 			int val = 0;
@@ -590,5 +770,25 @@ namespace Emulator
 			
 			yield break;
 		}
+
+        private static IEnumerable<bool> SWAP(Memory mem, Registers reg)
+        {
+            switch(mem[reg.PC + 1])
+            {
+                case 0x37:
+                    int low = reg.A & 0x0F;
+                    int high = reg.A & 0xF0;
+                    low <<= 4;
+                    high >>= 4;
+                    reg.A = (byte)(low | high);
+                    reg.fZ = reg.A == 0;
+                    break;
+            }
+            reg.fN = false;
+            reg.fH = false;
+            reg.fC = false;
+
+            yield break;
+        }
 	}
 }

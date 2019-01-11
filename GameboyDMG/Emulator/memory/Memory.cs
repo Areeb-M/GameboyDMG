@@ -181,7 +181,8 @@ namespace Emulator
 		public void DetachBootROM()
 		{
 			cartridge = cartridgeNorm;
-		}
+            Debug.Log(75, "Detached boot rom.\n");
+        }
 		
 		public Cartridge GetCartridge()
 		{
