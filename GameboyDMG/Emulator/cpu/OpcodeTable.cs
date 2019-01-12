@@ -8,7 +8,7 @@ namespace Emulator
 	// OF = OpcodeFunction
 	static class OpcodeTable
 	{
-        // 70/245 Opcodes Implemented
+        // 84/245 Opcodes Implemented
 		private static Dictionary<byte, OF> table = new Dictionary<byte, OF>()
         {
             {0x00, (OF)Opcode.NOP},
@@ -21,6 +21,7 @@ namespace Emulator
             {0x0D, (OF)Opcode.DECREMENT_REG},
             {0x0E, (OF)Opcode.LOAD_N_D8},
             {0x11, (OF)Opcode.LOAD_N_D16},
+            {0x12, (OF)Opcode.LOAD_N_N},
             {0x13, (OF)Opcode.INCREMENT_16_REG},
             {0x15, (OF)Opcode.DECREMENT_REG},
             {0x16, (OF)Opcode.LOAD_N_D8},
@@ -28,6 +29,7 @@ namespace Emulator
             {0x18, (OF)Opcode.JR_R8},
             {0x19, (OF)Opcode.ADD_HL_NN},
             {0x1A, (OF)Opcode.LOAD_N_N},
+            {0x1C, (OF)Opcode.INCREMENT_REG},
             {0x1D, (OF)Opcode.DECREMENT_REG},
             {0x1E, (OF)Opcode.LOAD_N_D8},
             {0x20, (OF)Opcode.JR_CC_R8},
@@ -41,6 +43,7 @@ namespace Emulator
             {0x2F, (OF)Opcode.COMPLEMENT},
             {0x31, (OF)Opcode.LOAD_N_D16},
             {0x32, (OF)Opcode.LDD_HL_A},
+            {0x35, (OF)Opcode.DECREMENT_REG},
             {0x36, (OF)Opcode.LOAD_N_N},
             {0x3D, (OF)Opcode.DECREMENT_REG},
             {0x3E, (OF)Opcode.LOAD_N_D8},
@@ -57,29 +60,40 @@ namespace Emulator
             {0x7B, (OF)Opcode.LOAD_N_N},
             {0x7C, (OF)Opcode.LOAD_N_N},
             {0x7D, (OF)Opcode.LOAD_N_N},
+            {0x7E, (OF)Opcode.LOAD_N_N},
             {0x86, (OF)Opcode.ADD},
             {0x87, (OF)Opcode.ADD},
-            {0x90, (OF)Opcode.SUB},
-            {0xA1, (OF)Opcode.AND},
+            {0x90, (OF)Opcode.SUB}, // ---------------------- 9
+            {0xA1, (OF)Opcode.AND}, // ---------------------- A
+            {0xA7, (OF)Opcode.AND},
             {0xA9, (OF)Opcode.XOR},
             {0xAF, (OF)Opcode.XOR},
-            {0xB0, (OF)Opcode.OR},
+            {0xB0, (OF)Opcode.OR}, // ---------------------- B
             {0xB1, (OF)Opcode.OR},
             {0xBE, (OF)Opcode.COMPARE},
             {0xC1, (OF)Opcode.POP},
             {0xC3, (OF)Opcode.JUMP},
             {0xC5, (OF)Opcode.PUSH},
+            {0xC8, (OF)Opcode.RET_CC},
             {0xC9, (OF)Opcode.RETURN},
+            {0xCA, (OF)Opcode.JP_CC_NN},
             {0xCB, (OF)Opcode.PREFIX_CB},
             {0xCD, (OF)Opcode.CALL_NN},
+            {0xD1, (OF)Opcode.POP},
+            {0xD5, (OF)Opcode.PUSH},
             {0xE0, (OF)Opcode.LD_FFNN_A},
             {0xE1, (OF)Opcode.POP},
             {0xE2, (OF)Opcode.LOAD_0xFFCC_A},
+            {0xE5, (OF)Opcode.PUSH},
             {0xE6, (OF)Opcode.AND},
+            {0xE9, (OF)Opcode.JUMP},
             {0xEA, (OF)Opcode.LOAD_N_A},
             {0xEF, (OF)Opcode.RESTART},
 			{0xF0, (OF)Opcode.LOAD_A_FFNN},
+            {0xF1, (OF)Opcode.POP},
             {0xF3, (OF)Opcode.DI},
+            {0xF5, (OF)Opcode.PUSH},
+            {0xFA, (OF)Opcode.LOAD_N_N},
             {0xFB, (OF)Opcode.EI},
 			{0xFE, (OF)Opcode.COMPARE},
 		};
