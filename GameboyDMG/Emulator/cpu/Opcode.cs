@@ -250,11 +250,15 @@ namespace Emulator
 					reg.C = reg.A;
 					Debug.Log(0, "LD C, A");
 					break;
-				case 0x57:
-					reg.D = reg.A;
-					Debug.Log(0, "LD D, A");
-					break;
-				case 0x67:
+                case 0x57:
+                    reg.D = reg.A;
+                    Debug.Log(0, "LD D, A");
+                    break;
+                case 0x5F:
+                    reg.E = reg.A;
+                    Debug.Log(0, "LD E, A");
+                    break;
+                case 0x67:
 					reg.H = reg.A;
 					Debug.Log(0, "LD H, A");
 					break;
@@ -293,7 +297,7 @@ namespace Emulator
 			yield break;
 		}
 		
-		public static IEnumerable<bool> LOAD_A_N(Memory mem, Registers reg)
+		public static IEnumerable<bool> LOAD_N_N(Memory mem, Registers reg)
 		{
 			switch(mem[reg.PC])
 			{
@@ -309,9 +313,23 @@ namespace Emulator
                     Debug.Log(0, "LD (LH), d8");
                     yield return true;
                     break;
+                case 0x56:
+                    reg.D = mem[reg.HL];
+                    Debug.Log(0, "LD D, (HL)");
+                    yield return true;
+                    break;
+                case 0x5E:
+                    reg.E = mem[reg.HL];
+                    Debug.Log(0, "LD E, (HL)");
+                    yield return true;
+                    break;
                 case 0x78:
                     reg.A = reg.B;
                     Debug.Log(0, "LD A, B");
+                    break;
+                case 0x79:
+                    reg.A = reg.C;
+                    Debug.Log(0, "LD A, C");
                     break;
                 case 0x7B:
 					reg.A = reg.E;
@@ -376,15 +394,22 @@ namespace Emulator
 		public static IEnumerable<bool> POP(Memory mem, Registers reg)
 		{
 			switch(mem[reg.PC])
-			{
-				case 0xC1:
-					reg.C = mem[reg.SP++];
-					yield return true;
-					reg.B = mem[reg.SP++];
-					yield return true;
-					Debug.Log(0, "POP BC");
-					break;
-			}			
+            {
+                case 0xC1:
+                    reg.C = mem[reg.SP++];
+                    yield return true;
+                    reg.B = mem[reg.SP++];
+                    yield return true;
+                    Debug.Log(0, "POP BC");
+                    break;
+                case 0xE1:
+                    reg.L = mem[reg.SP++];
+                    yield return true;
+                    reg.H = mem[reg.SP++];
+                    yield return true;
+                    Debug.Log(0, "POP HL");
+                    break;
+            }			
 			reg.PC += 1;
 			
 			yield break;
@@ -589,6 +614,10 @@ namespace Emulator
                     yield return true;
                     Debug.Log(0, "ADD A, (HL)");
                     break;
+                case 0x87:
+                    val = reg.A;
+                    Debug.Log(0, "ADD A, A");
+                    break;
             }
             int result = reg.A + val;
 
@@ -704,11 +733,53 @@ namespace Emulator
             yield break;
         }
 
-		/*
-		public static IEnumerable<bool> LOAD_R2_R1(Memory mem, Registers reg)
-		{
-			Implement Later
-		}*/
+        public static IEnumerable<bool> RESTART(Memory mem, Registers reg)
+        {
+            reg.PC += 1;
+            yield return true;
+
+            mem[--reg.SP] = (byte)(reg.PC >> 8);
+            mem[--reg.SP] = (byte)(reg.PC & 0xFF);
+            yield return true;
+
+            switch (mem[reg.PC - 1])
+            {
+                case 0xEF:
+                    reg.PC = 0x28;
+                    break;
+            }
+            yield return true;
+
+            Debug.Log(50, "Restart from {0:X4}", reg.PC);
+            yield break;
+        }
+
+        public static IEnumerable<bool> ADD_HL_NN(Memory mem, Registers reg)
+        {
+            int val = 0;
+            switch(mem[reg.PC])
+            {
+                case 0x19:
+                    val = reg.DE;
+                    Debug.Log(0, "ADD HL, DE");
+                    break;
+            }
+            yield return true;
+            int result = val + reg.HL;
+
+            // Reset flag N
+            reg.fN = false;
+            
+            // Check for carry from bit 11
+            reg.fH = ((val & 0xFFF) + (reg.HL & 0xFFF)) > 0xFFF;
+
+            // Check for overflow
+            reg.HL = 0xFFFF & result;
+            reg.fC = result > reg.HL;
+
+            reg.PC += 1;
+            yield break;
+        }
 	}
 
     // -----------------------------------------------------------------------------------------------------------------------------------------------
